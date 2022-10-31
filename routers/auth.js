@@ -92,4 +92,11 @@ router.post('/login', async (req, res) => {
         })
     }
 })
+
+router.get('/test', async (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "test success"
+    })
+})
 module.exports = router;
