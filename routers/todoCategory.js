@@ -4,19 +4,19 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/auth')
 
-const Post = require('../models/Post');
+const Category = require('../models/TodoCategory')
 
-// @router GET api/posts
-// @desc Get post
+// @router GET api/category
+// @desc Get category
 // @access Private
 router.get('/', verifyToken, async (req, res) => {
     console.log(req);
     try {
-        const posts = await Post.find({
+        const categorys = await Category.find({
             user: req.userId
         }).populate('user', ['username'])
         //populate : chiu sang bảng user để móc toàn bộ data user , và lấy ['username'] 
-        res.json({ success: true, posts })
+        res.json({ success: true, categorys })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -25,11 +25,11 @@ router.get('/', verifyToken, async (req, res) => {
     }
 })
 
-// @router POST api/posts
-// @desc Create post
+// @router POST api/Categorys
+// @desc Create Category
 // @access Private
 router.post('/', verifyToken, async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title } = req.body;
     //simple validation
     if (!title) {
         return res.status(400).json({
@@ -38,15 +38,12 @@ router.post('/', verifyToken, async (req, res) => {
         })
     }
     try {
-        const newPost = new Post({
+        const newCategory = new Category({
             title,
-            description,
-            url: url.startsWith('https://') ? url : `https://${url}`,
-            status: status || 'TO LEARN',
             user: req.userId
         })
-        await newPost.save();
-        res.json({ success: true, message: "Happy learning", post: newPost })
+        await newCategory.save();
+        res.json({ success: true, message: "Happy learning", categorys: newCategory })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -56,12 +53,12 @@ router.post('/', verifyToken, async (req, res) => {
 })
 
 
-// @router PUT api/posts
-// @desc Update post
+// @router PUT api/categorys
+// @desc Update Category
 // @access Private
 
 router.put('/:id', verifyToken, async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title } = req.body;
     //simple validation
     if (!title) {
         return res.status(400).json({
@@ -70,29 +67,26 @@ router.put('/:id', verifyToken, async (req, res) => {
         })
     }
     try {
-        let updatedPost = {
+        let updatedCategory = {
             title,
-            description: description || '',
-            url: (url.startsWith('https://') ? url : `https://${url}`) || '',
-            status: status || 'TO LEARN',
         }
-        const postUpdateCondition = {
+        const categoryUpdateCondition = {
             _id: req.params.id,
             user: req.userId
         }
-        updatedPost = await Post.findOneAndUpdate(postUpdateCondition, updatedPost, { new: true })
+        updatedCategory = await Category.findOneAndUpdate(categoryUpdateCondition, updatedCategory, { new: true })
 
-        // user not authorised to update post or post not found
-        if (!updatedPost) {
+        // user not authorised to update Category or Category not found
+        if (!updatedCategory) {
             return res.status(401).json({
                 success: false,
-                message: "post not found or user not authorised"
+                message: "Category not found or user not authorised"
             })
         }
         res.status(500).json({
             success: true,
             message: "Update success..!",
-            post: updatedPost
+            category: updatedCategory
         })
     } catch (error) {
         res.status(500).json({
@@ -103,26 +97,26 @@ router.put('/:id', verifyToken, async (req, res) => {
 })
 
 // @router DELETE  api/posts
-// @desc Delete post
+// @desc Delete Category
 // @access Private
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const postDeleteCondition = {
+        const categoryDeleteCondition = {
             _id: req.params.id,
             user: req.userId
         }
-        const deletePost = await Post.findOneAndDelete(postDeleteCondition)
+        const deleteCategory = await Category.findOneAndDelete(categoryDeleteCondition)
         // user not authorised to update post or post not found
-        if (!deletePost) {
+        if (!deleteCategory) {
             return res.status(401).json({
                 success: false,
-                message: "post not found or user not authorised"
+                message: "category not found or user not authorised"
             })
         }
         res.status(500).json({
             success: true,
             message: "Delete success..!",
-            post: deletePost
+            category: deleteCategory
         })
     } catch (error) {
         res.status(500).json({

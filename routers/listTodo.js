@@ -4,19 +4,17 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/auth')
 
-const Post = require('../models/Post');
+const ListTodos = require('../models/ListTodo');
 
-// @router GET api/posts
-// @desc Get post
+// @router GET api/todos
+// @desc Get ListTodo
 // @access Private
-router.get('/', verifyToken, async (req, res) => {
-    console.log(req);
+router.get('/:categoryId', verifyToken, async (req, res) => {
     try {
-        const posts = await Post.find({
-            user: req.userId
-        }).populate('user', ['username'])
-        //populate : chiu sang bảng user để móc toàn bộ data user , và lấy ['username'] 
-        res.json({ success: true, posts })
+        const Todos = await ListTodos.find({
+            category: req.params.categoryId
+        }).exec();
+        res.json({ success: true, Todos })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -25,11 +23,11 @@ router.get('/', verifyToken, async (req, res) => {
     }
 })
 
-// @router POST api/posts
+// @router POST api/todos
 // @desc Create post
 // @access Private
 router.post('/', verifyToken, async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title, description, status, category } = req.body;
     //simple validation
     if (!title) {
         return res.status(400).json({
@@ -38,16 +36,17 @@ router.post('/', verifyToken, async (req, res) => {
         })
     }
     try {
-        const newPost = new Post({
+        const newTodo = new ListTodos({
             title,
             description,
-            url: url.startsWith('https://') ? url : `https://${url}`,
-            status: status || 'TO LEARN',
-            user: req.userId
+            status: false,
+            category
         })
-        await newPost.save();
-        res.json({ success: true, message: "Happy learning", post: newPost })
+        console.log(newTodo);
+        await newTodo.save();
+        res.json({ success: true, message: "Call Thành Công", todo: newTodo })
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Internal server error"
@@ -56,12 +55,12 @@ router.post('/', verifyToken, async (req, res) => {
 })
 
 
-// @router PUT api/posts
-// @desc Update post
+// @router PUT api/todos
+// @desc Update todo
 // @access Private
 
 router.put('/:id', verifyToken, async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title, description, status } = req.body;
     //simple validation
     if (!title) {
         return res.status(400).json({
@@ -70,31 +69,33 @@ router.put('/:id', verifyToken, async (req, res) => {
         })
     }
     try {
-        let updatedPost = {
+        let updatedTodo = {
             title,
             description: description || '',
-            url: (url.startsWith('https://') ? url : `https://${url}`) || '',
-            status: status || 'TO LEARN',
+            status: status,
         }
-        const postUpdateCondition = {
+        // console.log(updatedTodo);
+        const todoUpdateCondition = {
             _id: req.params.id,
-            user: req.userId
+            // category: "63915fa3a51619d87e92c141"
         }
-        updatedPost = await Post.findOneAndUpdate(postUpdateCondition, updatedPost, { new: true })
+        console.log(todoUpdateCondition);
+        updatedTodo = await ListTodos.findOneAndUpdate(todoUpdateCondition, updatedTodo, { new: true })
 
         // user not authorised to update post or post not found
-        if (!updatedPost) {
+        if (!updatedTodo) {
             return res.status(401).json({
                 success: false,
-                message: "post not found or user not authorised"
+                message: "todo not found or user not authorised"
             })
         }
         res.status(500).json({
             success: true,
             message: "Update success..!",
-            post: updatedPost
+            post: updatedTodo
         })
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Internal server error"
@@ -107,24 +108,25 @@ router.put('/:id', verifyToken, async (req, res) => {
 // @access Private
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const postDeleteCondition = {
+        const todoDeleteCondition = {
             _id: req.params.id,
-            user: req.userId
+            // category: req.params.categoryId
         }
-        const deletePost = await Post.findOneAndDelete(postDeleteCondition)
+        const deleteTodo = await ListTodos.findOneAndDelete(todoDeleteCondition)
         // user not authorised to update post or post not found
-        if (!deletePost) {
+        if (!deleteTodo) {
             return res.status(401).json({
                 success: false,
-                message: "post not found or user not authorised"
+                message: "todo not found or user not authorised"
             })
         }
         res.status(500).json({
             success: true,
             message: "Delete success..!",
-            post: deletePost
+            todo: deleteTodo
         })
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Internal server error"
