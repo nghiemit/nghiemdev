@@ -1,5 +1,7 @@
 require('dotenv').config()
+const cors = require('cors')
 const express = require('express');
+
 const mongoose = require('mongoose');
 
 const authRouter = require('./routers/auth')
@@ -17,6 +19,7 @@ const connectDB = async () => {
 }
 connectDB();
 const app = express();
+app.use(cors())
 app.get('/', (req, res) => res.send('nghiem'))
 
 app.use(express.json())
