@@ -120,7 +120,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
                 message: "todo not found or user not authorised"
             })
         }
-        res.status(500).json({
+        res.status(200).json({
             success: true,
             message: "Delete success..!",
             todo: deleteTodo
