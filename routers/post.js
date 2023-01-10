@@ -89,7 +89,7 @@ router.put('/:id', verifyToken, async (req, res) => {
                 message: "post not found or user not authorised"
             })
         }
-        res.status(500).json({
+        res.status(200).json({
             success: true,
             message: "Update success..!",
             post: updatedPost
@@ -119,7 +119,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
                 message: "post not found or user not authorised"
             })
         }
-        res.status(500).json({
+        res.status(200).json({
             success: true,
             message: "Delete success..!",
             post: deletePost

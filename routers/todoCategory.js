@@ -83,7 +83,7 @@ router.put('/:id', verifyToken, async (req, res) => {
                 message: "Category not found or user not authorised"
             })
         }
-        res.status(500).json({
+        res.status(200).json({
             success: true,
             message: "Update success..!",
             category: updatedCategory
@@ -113,7 +113,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
                 message: "category not found or user not authorised"
             })
         }
-        res.status(500).json({
+        res.status(200).json({
             success: true,
             message: "Delete success..!",
             category: deleteCategory
